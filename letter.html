@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<title>Тебе письмо</title>
+<style>
+:root{--bg:#07080c;--bg2:#171b2a;--ink:#ecebf0;--dim:#9a9cae;--rose:#e0607f;--gold:#d9bd86;--line:rgba(217,189,134,.3);
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:radial-gradient(circle at 84% 9%,rgba(205,215,245,.16),transparent 22%),radial-gradient(ellipse at 50% 15%,var(--bg2),var(--bg) 72%);color:var(--ink);font-family:Georgia,'Palatino Linotype',serif;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.stage{width:100%;max-width:460px;padding:18px;text-align:center;position:relative;z-index:2;max-height:100%;overflow-y:auto}
+.screen{display:none}
+.screen.on{display:block;animation:in 1s ease both}
+@keyframes in{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+h1{font-size:28px;font-weight:400;letter-spacing:.5px;margin:0 0 12px;line-height:1.3}
+p{font-size:18px;line-height:1.7;margin:0 0 14px}
+.dim{color:var(--dim);font-size:15px;letter-spacing:1.5px}
+.env{position:relative;width:270px;height:180px;margin:0 auto 30px;cursor:pointer;animation:float 4s ease-in-out infinite;filter:drop-shadow(0 18px 30px rgba(0,0,0,.6))}
+.env .body{position:absolute;inset:0;background:linear-gradient(145deg,#2b3042,#171b29);border-radius:8px;border:1px solid var(--line)}
+.env .flap{position:absolute;left:0;right:0;top:0;height:100px;transform-origin:top;transition:transform .8s ease;background:linear-gradient(180deg,#363c52,#222637);clip-path:polygon(0 0,100% 0,50% 100%);z-index:2}
+.env.open .flap{transform:rotateX(180deg)}
+.seal{position:absolute;left:50%;top:84px;transform:translate(-50%,-50%);width:42px;height:42px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#d9bd86,#8c6d34);display:flex;align-items:center;justify-content:center;z-index:3;font-size:18px;box-shadow:0 3px 10px #0008;transition:opacity .4s}
+.env.open .seal{opacity:0}
+@keyframes float{50%{transform:translateY(-8px)}}
+.letter{background:rgba(14,16,25,.55);border:1px solid var(--line);border-radius:14px;padding:28px 24px;text-align:left;box-shadow:0 20px 50px #000a;max-height:72vh;overflow-y:auto;position:relative}
+.letter p{font-size:17px;line-height:1.7;margin-bottom:15px;opacity:0;animation:in 1s ease forwards}
+.letter .first{color:var(--gold);font-size:19px}
+.sign{text-align:right;font-style:italic;color:var(--gold)}
+.btns{display:flex;justify-content:center;margin-top:20px;min-height:56px;opacity:0;animation:in 1s ease forwards}
+button{font-family:inherit;font-size:17px;border-radius:999px;padding:13px 30px;cursor:pointer;letter-spacing:.3px;background:transparent;color:var(--ink);border:1px solid var(--line);transition:background .3s}
+button:hover{background:rgba(217,189,134,.12)}
+.pw{width:min(86vw,380px);height:min(86vw,380px);margin:0 auto}
+.cap{opacity:0;transition:opacity 2s;margin-top:8px;color:var(--ink)}
+.cap.show{opacity:1}
+#cv{position:fixed;inset:0;width:100%;height:100%;z-index:1;pointer-events:none}
+.sad{position:fixed;top:0;z-index:1;pointer-events:none;opacity:.22;animation:drift linear infinite;transition:opacity 1.5s}
+.sad.off{opacity:0!important}
+@keyframes drift{0%{transform:translate3d(0,-14vh,0) rotate(-12deg)}100%{transform:translate3d(36px,114vh,0) rotate(12deg)}}
+.rain{position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.7;background-image:linear-gradient(100deg,transparent 48%,rgba(170,185,220,.16) 50%,transparent 52%),linear-gradient(100deg,transparent 48%,rgba(170,185,220,.09) 50%,transparent 52%);background-size:41px 110px,67px 170px;animation:rainmove 1.1s linear infinite}
+@keyframes rainmove{to{background-position:-12px 110px,-20px 170px}}
+@media (prefers-reduced-motion:reduce){.rain,.sad,.env{animation:none}}
+.later{opacity:0;transition:opacity 1.5s;margin-top:20px;display:flex;justify-content:center}
+.later.show{opacity:1}
+.opt{display:block;width:100%;margin:9px 0;padding:13px 16px;font-size:16px;border-radius:12px;text-align:center}
+.back{position:fixed;top:calc(12px + env(safe-area-inset-top,0px));left:14px;z-index:5;color:var(--dim);font-size:14px;text-decoration:none}
+</style>
+</head>
+<body>
+<div class="rain"></div>
+<a class="back" href="index.html" onclick="try{parent.go('index');return false}catch(e){}">← В пространство</a>
+<canvas id="cv"></canvas>
+<div class="stage">
+
+<div class="screen on" id="s0">
+  <div class="env" id="env"><div class="body"></div><div class="flap"></div><div class="seal">✉</div></div>
+  <h1>Тебе письмо</h1>
+  <p class="dim">НАЖМИ НА КОНВЕРТ</p>
+</div>
+
+<div class="screen" id="s1">
+  <div class="letter" id="letter">
+    <p class="first">Родная, пожалуйста, не держи на меня зла за мои вопросы и лишние расспросы. Я не хочу тебя контролировать или доставлять дискомфорт. Просто я очень боюсь тебя потерять. Ты стала настолько близким и дорогим человеком, что мне до сих пор тяжело привыкнуть к тому, что между нами всё изменилось.</p>
+    <p>Я очень скучаю по тебе: по нашим разговорам, прикосновениям, твоей улыбке и голосу. Мне не хватает даже самых обычных мелочей, связанных с тобой.</p>
+    <p>Я не прошу начинать всё сначала или возвращать то, что было. Мне просто хочется, чтобы между нами оставалось тепло, чтобы мы могли общаться без обид и злости.</p>
+    <p>Мне сейчас действительно нелегко. Иногда меня накрывают мысли о том, что я могу потерять тебя окончательно. Меня пугает даже мысль, что однажды кто-то другой займёт моё место. Наверное, поэтому я порой задаю слишком много вопросов. Прости меня за это.</p>
+    <p>Я никогда не хотел причинять тебе боль. Да, я совершал ошибки, порой позволял эмоциям брать верх, но поверь, всё это было не со зла.</p>
+    <p>Я не знаю, как дальше всё сложится, но очень надеюсь, что со временем между нами станет легче.</p>
+    <p>Я люблю тебя, солнце. До сих пор люблю и очень скучаю.</p>
+    <p class="sign">Тёма</p>
+  </div>
+  <div class="btns" id="nextWrap"><button id="next">Дальше</button></div>
+</div>
+
+<div class="screen" id="s2">
+  <div class="pw" id="pw"></div>
+  <p class="cap" id="cap">Я скучаю по тебе</p>
+  <div class="later" id="cap2"><button id="next2">Дальше</button></div>
+</div>
+
+<div class="screen" id="s3">
+  <div class="letter" style="text-align:center">
+    <p class="first" style="animation-delay:.3s">Ты ничего не обязана отвечать.</p>
+    <p style="animation-delay:1.5s">Мне достаточно того, что ты это прочитала. Спасибо тебе за это и за всё хорошее, что было между нами.</p>
+    <div id="opts" style="display:none;opacity:0;animation:in 1s ease 3s forwards">
+      <p id="optsHint" style="color:var(--dim);font-size:15px;opacity:1;animation:none">Если захочешь ответить, выбери, как тебе удобно:</p>
+      <button class="opt" data-i="0">Мне нужно время</button>
+      <button class="opt" data-i="1">Давай пока просто иногда писать друг другу</button>
+      <button class="opt" data-i="2">Давай поговорим</button>
+      <button class="opt" data-i="3">Мне пока сложно, но, возможно, позже</button>
+    </div>
+  </div>
+</div>
+
+</div>
+<script>
+var screens=[].slice.call(document.querySelectorAll('.screen'));
+function show(i){screens.forEach(function(s,k){s.classList.toggle('on',k===i)})}
+
+/* грустные смайлики на фоне письма */
+var SAD=['😔','😢','😞','🥺','😟','😪','😥','☹️','😿','🌧️'];
+var sads=[];
+function sadOn(){
+  for(var i=0;i<30;i++){
+    var d=document.createElement('div');
+    d.className='sad';
+    d.textContent=SAD[Math.floor(Math.random()*SAD.length)];
+    d.style.left=Math.random()*100+'vw';
+    d.style.fontSize=(22+Math.random()*26)+'px';
+    d.style.animationDuration=(18+Math.random()*16)+'s';
+    d.style.animationDelay=(-Math.random()*30)+'s';
+    d.style.opacity=(.14+Math.random()*.14);
+    document.body.appendChild(d);sads.push(d);
+  }
+}
+function sadOff(){
+  sads.forEach(function(d){d.classList.add('off')});
+  setTimeout(function(){sads.forEach(function(d){d.remove()});sads=[]},1600);
+}
+
+/* тысячи сердечек собираются в фото */
+var cv=document.getElementById('cv'),ctx=cv.getContext('2d'),dpr=Math.min(window.devicePixelRatio||1,2);
+var running=false,parts=[],t0=0,W=0,H=0;
+function resize(){W=innerWidth;H=innerHeight;cv.width=W*dpr;cv.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0)}
+addEventListener('resize',resize);resize();
+function inHeart(i,j,n){
+  var x=(i/n-.5)*2.7,y=(.5-j/n)*2.7+.05;
+  var a=x*x+y*y-1;return a*a*a-x*x*y*y*y<=0;
+}
+function heart(x,y,s){
+  y-=s/2;
+  ctx.beginPath();
+  ctx.moveTo(x,y+s*.3);
+  ctx.bezierCurveTo(x,y,x-s*.5,y,x-s*.5,y+s*.3);
+  ctx.bezierCurveTo(x-s*.5,y+s*.6,x,y+s*.75,x,y+s);
+  ctx.bezierCurveTo(x,y+s*.75,x+s*.5,y+s*.6,x+s*.5,y+s*.3);
+  ctx.bezierCurveTo(x+s*.5,y,x,y,x,y+s*.3);
+  ctx.fill();
+}
+function ease(u){return u<.5?4*u*u*u:1-Math.pow(-2*u+2,3)/2}
+function build(pix,n){
+  var r=document.getElementById('pw').getBoundingClientRect();
+  var S=r.width,cx=r.left+r.width/2,cy=r.top+r.height/2,cell=S/n;
+  parts=[];
+  for(var j=0;j<n;j++)for(var i=0;i<n;i++){
+    if(!inHeart(i,j,n))continue;
+    var k=(j*n+i)*4,col;
+    if(pix){col='rgb('+pix[k]+','+pix[k+1]+','+pix[k+2]+')'}
+    else{var l=Math.round(40+(1-j/n)*18+Math.random()*10);col='hsl('+Math.round(335+Math.random()*15)+',60%,'+l+'%)'}
+    var a=Math.random()*Math.PI*2,d=Math.max(W,H)*(.5+Math.random()*.6);
+    parts.push({tx:cx-S/2+(i+.5)*cell,ty:cy-S/2+(j+.5)*cell,sx:W/2+Math.cos(a)*d,sy:H/2+Math.sin(a)*d,
+      c:col,d:Math.random()*1.8,sw:(Math.random()-.5)*160,s:cell*1.5});
+  }
+  t0=performance.now();running=true;requestAnimationFrame(frame);
+  setTimeout(function(){document.getElementById('cap').classList.add('show')},5200);
+  setTimeout(function(){document.getElementById('cap2').classList.add('show')},7500);
+}
+function frame(now){
+  if(!running)return;
+  var t=(now-t0)/1000;
+  ctx.clearRect(0,0,W,H);
+  var beat=t>5?1+.02*Math.sin((t-5)*3)*Math.exp(-((t-5)%3)*.5):1;
+  var r=document.getElementById('pw').getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2;
+  for(var i=0;i<parts.length;i++){
+    var p=parts[i],u=Math.max(0,Math.min(1,(t-p.d)/3));
+    if(u<=0)continue;
+    var e=ease(u),x=p.sx+(p.tx-p.sx)*e,y=p.sy+(p.ty-p.sy)*e;
+    var w=Math.sin(u*Math.PI)*p.sw;x+=w;y-=w*.5;
+    if(beat!==1){x=cx+(x-cx)*beat;y=cy+(y-cy)*beat}
+    ctx.globalAlpha=Math.min(1,u*4);
+    ctx.fillStyle=p.c;
+    heart(x,y,p.s*(.5+.5*e));
+  }
+  ctx.globalAlpha=1;
+  requestAnimationFrame(frame);
+}
+function startPhoto(){
+  var n=64,img=new Image();
+  img.onload=function(){
+    try{
+      var c=document.createElement('canvas');c.width=c.height=n;
+      var g=c.getContext('2d'),m=Math.min(img.width,img.height);
+      g.drawImage(img,(img.width-m)/2,(img.height-m)/2,m,m,0,0,n,n);
+      build(g.getImageData(0,0,n,n).data,n);
+    }catch(e){build(null,n)}
+  };
+  img.onerror=function(){build(null,n)};
+  img.src='her.jpg';
+}
+
+document.getElementById('env').onclick=function(){
+  this.classList.add('open');
+  setTimeout(function(){
+    show(1);sadOn();
+    var ps=document.querySelectorAll('#letter p');
+    for(var i=0;i<ps.length;i++)ps[i].style.animationDelay=(.3+i*.8)+'s';
+    document.getElementById('nextWrap').style.animationDelay=(.3+ps.length*.8+1)+'s';
+  },900);
+};
+var TG=''; /* ник в Telegram без @; если пусто, кнопки ответа не показываются */
+var REPL=['Спасибо, что написал. Мне нужно время.','Я прочитала. Давай пока просто иногда писать друг другу.','Давай поговорим.','Спасибо за письмо. Мне пока сложно, но, возможно, позже.'];
+var FORM=''; /* адрес формы, например https://formspree.io/f/xxxx; если пусто, используется Telegram */
+var LABELS=['Мне нужно время','Давай пока просто иногда писать друг другу','Давай поговорим','Мне пока сложно, но, возможно, позже'];
+function done(ok){
+  document.getElementById('opts').innerHTML='<p style="opacity:1;animation:none;color:var(--gold)">'+(ok?'Спасибо. Твой ответ отправлен.':'Не получилось отправить. Если хочешь, напиши мне сама.')+'</p>';
+}
+if(TG||FORM){
+  document.getElementById('opts').style.display='block';
+  document.getElementById('optsHint').textContent=FORM?'Если захочешь ответить, выбери вариант. Он придёт мне как твой ответ.':'Если захочешь ответить, выбери вариант: откроется Telegram с готовым сообщением.';
+  [].slice.call(document.querySelectorAll('.opt')).forEach(function(b){
+    b.onclick=function(){
+      var i=+b.getAttribute('data-i');
+      if(FORM){
+        fetch(FORM,{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify({answer:LABELS[i],message:'Ответ на твоё письмо: '+LABELS[i]})})
+          .then(function(r){done(r.ok)}).catch(function(){done(false)});
+      }else{
+        window.open('https://t.me/'+TG+'?text='+encodeURIComponent(REPL[i]),'_blank');
+      }
+    };
+  });
+}
+document.getElementById('next2').onclick=function(){
+  running=false;ctx.clearRect(0,0,W,H);show(3);
+};
+document.getElementById('next').onclick=function(){
+  sadOff();show(2);setTimeout(startPhoto,400);
+};
+</script>
+</body>
+</html>
